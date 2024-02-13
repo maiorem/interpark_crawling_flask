@@ -18,6 +18,9 @@ application = Flask(__name__)
 
 @application.route("/data", methods=["POST"])
 def crawl():    
+    request_data = json.loads(request.get_data(), encoding='utf-8')
+    title = request_data['title']
+    theater = request_data['theater'] 
     best_price = 0
 
     # 크롬 드라이버 로드
@@ -33,7 +36,7 @@ def crawl():
     # 리스트에서 해당 타이틀 검색
     element = driver.find_element(By.CLASS_NAME, 'tnQuLuQVH40G5ngQs3Q7')
     search = element.find_element(By.TAG_NAME, 'input')
-    search.send_keys('MAN FROM EARTH')
+    search.send_keys(title)
     search.send_keys(Keys.RETURN)
     time.sleep(3)
 
