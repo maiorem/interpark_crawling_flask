@@ -25,8 +25,8 @@ def crawl():
     
     response ={ "status" : "200", "result" : { "message" : "", "best_price": best_price}}
 
-    # 크롬 드라이버 로드
     try :
+        # 크롬 드라이버 로드
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_experimental_option("detach", True)
         chrome_options.add_argument('window-size=800,600')
@@ -35,18 +35,32 @@ def crawl():
     except WebDriverException :
         message = "크롬드라이버를 찾을 수 없습니다."
         response ={ "status" : "500", "result" : { "message" : message, "best_price": best_price}}
+        driver.close()
         return jsonify(response)
     
-    # 리스트에서 해당 타이틀 검색
-    element = driver.find_element(By.CLASS_NAME, 'tnQuLuQVH40G5ngQs3Q7')
-    search = element.find_element(By.TAG_NAME, 'input')
-    search.send_keys(title)
-    search.send_keys(Keys.RETURN)
-    time.sleep(3)
+    try :
+        # 리스트에서 해당 타이틀 검색
+        element = driver.find_element(By.CLASS_NAME, 'bjwEPif5TbJS3HdYBgz5')
+        search = element.find_element(By.TAG_NAME, 'input')
+        search.send_keys(title)
+        search.send_keys(Keys.RETURN)
+        time.sleep(2)
+    except NoSuchElementException:
+        message = "no such element exception!  - Can not find search input"
+        response ={ "status" : "300", "result" : { "message" : message, "best_price": best_price}}
+        driver.close()
+        return jsonify(response)
+    
+    try :
+        # 검색 페이지에서 첫번째 요소 클릭
+        driver.find_element(By.XPATH, '//*[@id="__next"]/div/main/div/div/div[1]/div[2]/a[1]').click()
+        time.sleep(3)
+    except NoSuchElementException:
+        message = "no such element exception!  - Can not find the play"
+        response ={ "status" : "300", "result" : { "message" : message, "best_price": best_price}}
+        driver.close()
+        return jsonify(response)
 
-    # 검색 페이지에서 첫번째 요소 클릭
-    driver.find_element(By.XPATH, '//*[@id="__next"]/div/main/div/div/div[1]/div[2]/a[1]').click()
-    time.sleep(3)
 
     # 팝업이 있으면 닫음
 
@@ -56,7 +70,7 @@ def crawl():
         element = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CLASS_NAME, 'infoBtn'))
         )
-        driver.find_elements(By.CLASS_NAME, 'infoBtn')[1].click()
+        driver.find_element(By.CLASS_NAME, 'infoBtn.is-accent').click()
 
         price_list = []
 
@@ -65,8 +79,10 @@ def crawl():
         price_categories = soup.select('td.name + td')
         for category in price_categories:
             price_list.append(category.text)
-
+            
+        print(price_list)
         num_price = []
+        
         for price in price_list:
             print(price + ' ')
             price = price.replace('원', '')
@@ -89,7 +105,8 @@ def crawl():
         message = "popup error - Can not collect prices"
         response ={ "status" : "302", "result" : { "message" : message, "best_price": best_price}}
     finally:
+        driver.close()
         return jsonify(response)
 
 if __name__ == "__main__":
-    application.run(host='0.0.0.0', port=80, debug=True)
+    application.run(host='0.0.0.0', port=5000, debug=True)
