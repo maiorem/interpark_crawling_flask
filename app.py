@@ -33,8 +33,10 @@ def crawl():
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
         driver.get('https://ticket.interpark.com/TPGoodsList.asp?Ca=Dra&Sort=4')
     except WebDriverException :
-        print("크롬드라이버를 찾을 수 없습니다.")
-
+        message = "크롬드라이버를 찾을 수 없습니다."
+        response ={ "status" : "500", "result" : { "message" : message, "best_price": best_price}}
+        return jsonify(response)
+    
     # 리스트에서 해당 타이틀 검색
     element = driver.find_element(By.CLASS_NAME, 'tnQuLuQVH40G5ngQs3Q7')
     search = element.find_element(By.TAG_NAME, 'input')
