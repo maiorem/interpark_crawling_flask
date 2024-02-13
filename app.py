@@ -22,6 +22,8 @@ def crawl():
     title = request_data['title']
     theater = request_data['theater'] 
     best_price = 0
+    
+    response ={ "status" : "200", "result" : { "message" : "", "best_price": best_price}}
 
     # 크롬 드라이버 로드
     try :
@@ -73,15 +75,18 @@ def crawl():
         for price in num_price:
             if price < best_price:
                 best_price = price
-
+        message = "success!"
+        response ={ "status" : "200", "result" : { "message" : message, "best_price": best_price}}
     except NoSuchElementException:
-        print("no such element exception!  - Can not collect prices")
+        message = "no such element exception!  - Can not collect prices"
+        response ={ "status" : "300", "result" : { "message" : message, "best_price": best_price}}
     except UnexpectedAlertPresentException:
-        print("UnexpectedAlertPresentException!  - Can not collect prices")
+        message = "UnexpectedAlertPresentException!  - Can not collect prices"
+        response ={ "status" : "301", "result" : { "message" : message, "best_price": best_price}}
     except ElementClickInterceptedException:
-        print("popup error - Can not collect prices")
+        message = "popup error - Can not collect prices"
+        response ={ "status" : "302", "result" : { "message" : message, "best_price": best_price}}
     finally:
-        response = {"best_price" : best_price}
         return jsonify(response)
 
 if __name__ == "__main__":
